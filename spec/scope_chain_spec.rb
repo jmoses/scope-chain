@@ -1,8 +1,13 @@
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
+require 'active_record'
 require 'mocha/api'
 require 'scope_chain'
+
+class Model < ActiveRecord::Base
+  scope :active, where("column = value")
+end
 
 describe ScopeChain do
   let(:klass) { Class.new }
@@ -42,6 +47,12 @@ describe ScopeChain::Chain do
     subject.all(:boom)
   end
 
+  it "supports manual scopes" do
+    subject.select("id")
+
+    klass.scoped.select("id")
+  end
+
   describe "#add_link" do
     it "adds a basic expectation" do
       expectation = mock
@@ -60,6 +71,24 @@ describe ScopeChain::Chain do
       klass.expects(:expects).with(:name).returns(expectation)
 
       subject.send :add_link, :name, :arguments, :returned
+    end
+  end
+
+  describe "with a custom scopes" do
+    it "fails properly" do
+      pending
+
+      ScopeChain.for(Model).where("column != value")
+
+      expect { Model.active.to_a }.to raise_error(Mocha::StubbingError)
+    end
+
+    it "passes properly" do
+      pending
+
+      ScopeChain.for(Model).where("column = value")
+
+      Model.active.to_a
     end
   end
 

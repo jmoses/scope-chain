@@ -11,6 +11,7 @@ module ScopeChain
     attr_accessor :klass
     def initialize(klass, &block)
       self.klass = klass
+      self.klass.stubs(scoped: klass) # Handle manual scope building
 
       yield self if block_given?
     end
@@ -24,7 +25,7 @@ module ScopeChain
     def all(returned)
       add_link :all, nil, returned
     end
-    
+
     private
     def add_link(name, arguments = nil, returned = klass)
       expectation = klass.expects(name)
