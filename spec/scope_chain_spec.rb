@@ -31,7 +31,7 @@ describe ScopeChain::Chain do
     end
     
     it "adds a link for #{link}" do
-      subject.expects(:add_link).with(link, :arguments, klass)
+      subject.expects(:add_link).with(link, :arguments)
 
       subject.send(link, :arguments)
     end
@@ -42,7 +42,8 @@ describe ScopeChain::Chain do
   end
 
   it "adds a link for all" do
-    subject.expects(:add_link).with(:all, nil, :boom)
+    subject.expects(:add_link).with(:all)
+    subject.expects(:returns).with(:boom)
 
     subject.all(:boom)
   end
@@ -53,24 +54,32 @@ describe ScopeChain::Chain do
     klass.scoped.select("id")
   end
 
+  describe "#returns" do
+    it "modifies the last expectation" do
+      subject.select("id").where("5").returns("9")
+
+      klass.select("id").where("5").should eq("9")
+    end
+  end
+
   describe "#add_link" do
     it "adds a basic expectation" do
       expectation = mock
-      expectation.expects(:returns).with(:returned)
+      expectation.expects(:returns).with(klass)
 
       klass.expects(:expects).with(:name).returns(expectation)
 
-      subject.send :add_link, :name, nil, :returned
+      subject.send :add_link, :name
     end
 
     it "adds an expectation with arguments" do
       expectation = mock
       expectation.expects(:with).with(:arguments)
-      expectation.expects(:returns).with(:returned)
+      expectation.expects(:returns).with(klass)
 
       klass.expects(:expects).with(:name).returns(expectation)
 
-      subject.send :add_link, :name, :arguments, :returned
+      subject.send :add_link, :name, :arguments
     end
   end
 

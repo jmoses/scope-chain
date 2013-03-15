@@ -31,6 +31,31 @@ Using ScopeChain, you do:
 
 What this will do is setup some expectations that make sure those scope methods are called.
 
+You can do "manual" scopes:
+
+    def manual_scopes
+      User.scoped.where("somethign = else")
+    end
+
+    it "does the right thing" do
+      ScopeChain.for(User).where("something = else")
+
+      manual_scopes
+    end
+
+You can test return values:
+
+    def return_values
+      User.where("thing = 1")
+    end
+
+    it "returns properly" do
+      ScopeChain.for(User).where("thing = 1").returns(5)
+
+      return_values.should eq(5)
+    end
+
+
 Not in order, but called, which is something, right?
 
 ## Known Issues
