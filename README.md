@@ -33,11 +33,16 @@ What this will do is setup some expectations that make sure those scope methods 
 
 Not in order, but called, which is something, right?
 
+## Known Issues
+
+Uh, actual, user defined scopes don't work. Or if they do, I'd be surprised.  And I'm sure I'm
+missing a bunch of the ActiveRecord methods that are used.
+
 ## Installation
 
 Add this line to your application's Gemfile:
 
-    gem 'scope-chain'
+    gem 'scope_chain'
 
 And then execute:
 
@@ -45,7 +50,7 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install scope-chain
+    $ gem install scope_chain
 
 ## Contributing
 
