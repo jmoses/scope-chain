@@ -8,10 +8,14 @@ module ScopeChain
   class Chain
     LINKS = [:select, :where, :includes, :order]
 
-    attr_accessor :klass, :expectations
+    class ConflictedExistenceError < StandardError
+    end
+
+    attr_accessor :klass
     def initialize(klass, &block)
       self.klass = klass
-      self.expectations = []
+      @expectations = []
+      @exists_condition = false
       self.klass.stubs(scoped: klass) # Handle manual scope building
 
       yield self if block_given?
@@ -30,9 +34,17 @@ module ScopeChain
 
     def returns(object)
       # DON'T LOOK
-      expectations.last.instance_variable_set(:@return_values, Mocha::ReturnValues.build(object))
+      @expectations.last.instance_variable_set(:@return_values, Mocha::ReturnValues.build(object))
       
       self
+    end
+
+    def exists!
+      set_exists true
+    end
+
+    def missing!
+      set_exists false
     end
 
     private
@@ -41,9 +53,21 @@ module ScopeChain
       expectation.with(*arguments) if arguments.size > 0
       expectation.returns(klass)
 
-      expectations << expectation
+      @expectations << expectation
 
       self
     end
+
+    def set_exists(value)
+      if @exists_condition
+        raise ConflictedExistenceError.new("Can only set one 'exists' conditions, #missing! or #exists!")
+      end
+
+      klass.expects(exists?: value)
+      @exists_condition = true
+
+      self
+    end
+
   end
 end

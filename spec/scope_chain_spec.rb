@@ -83,6 +83,22 @@ describe ScopeChain::Chain do
     end
   end
 
+  describe "#exists!" do
+    it "exists" do
+      subject.exists!
+
+      klass.should be_exists
+    end
+  end
+
+  describe "#missing!" do
+    it "does not exist" do
+      subject.missing!
+
+      klass.should_not be_exists
+    end
+  end
+
   describe "with a custom scopes" do
     it "fails properly" do
       pending
