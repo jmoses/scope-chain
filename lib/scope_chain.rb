@@ -5,8 +5,38 @@ module ScopeChain
     Chain.new klass, &block
   end
 
+  def self.on(instance)
+    AssociationChain.new instance
+  end
+
+  class AssociationChain
+    attr_accessor :instance, :association
+
+    def initialize(instance)
+      self.instance = instance
+    end
+
+    def as(association_name)
+      self.association = instance.class.reflect_on_association(association_name)
+
+      chain
+    end
+
+    private
+    def association_name(klass)
+      klass.name.underscore.pluralize
+    end
+
+    def chain
+      ScopeChain::Chain.new(association.klass).tap do |chain|
+        instance.stubs(association.name => association.klass)
+      end
+    end
+  end
+
   class Chain
-    LINKS = [:select, :where, :includes, :order, :find]
+    LINKS = [:select, :where, :includes, :order, :find, :sum, :new]
+    ALIASES = {} 
 
     class ConflictedExistenceError < StandardError
     end
@@ -24,6 +54,12 @@ module ScopeChain
     LINKS.each do |link|
       define_method(link) do |*arguments|
         add_link link, *arguments
+      end
+    end
+
+    ALIASES.each do |source, dest|
+      define_method(source) do |*arguments|
+        add_link dest, *arguments
       end
     end
 

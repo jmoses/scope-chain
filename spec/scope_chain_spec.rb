@@ -5,8 +5,25 @@ require 'active_record'
 require 'mocha/api'
 require 'scope_chain'
 
+ActiveRecord::Base.establish_connection({
+  adapter: 'sqlite3',
+  database: ":memory:",
+  verbosity: 'quiet'
+})
+
+ActiveRecord::Base.connection.create_table :models do |table|
+  table.belongs_to :owners
+  table.integer :column
+end
+
+ActiveRecord::Base.connection.create_table :owners
+
 class Model < ActiveRecord::Base
   scope :active, where("column = value")
+end
+
+class Owner < ActiveRecord::Base
+  has_many :models
 end
 
 describe ScopeChain do
@@ -52,6 +69,12 @@ describe ScopeChain::Chain do
     subject.select("id")
 
     klass.scoped.select("id")
+  end
+
+  it "works with the alias scopes" do
+    subject.new(5)
+
+    klass.new(5)
   end
 
   describe "#returns" do
@@ -114,6 +137,17 @@ describe ScopeChain::Chain do
       ScopeChain.for(Model).where("column = value")
 
       Model.active.to_a
+    end
+  end
+
+  context "with associations" do
+    describe "has_many" do
+      it "properly sets stuff up" do
+        source = Owner.new
+        ScopeChain.on(source).as(:models).new(column: 5).returns(:abc)
+
+        source.models.new(column: 5).should eq(:abc)
+      end
     end
   end
 
