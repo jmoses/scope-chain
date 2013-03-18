@@ -6,7 +6,7 @@ module ScopeChain
   end
 
   class Chain
-    LINKS = [:select, :where, :includes, :order]
+    LINKS = [:select, :where, :includes, :order, :find]
 
     class ConflictedExistenceError < StandardError
     end
