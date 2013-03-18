@@ -44,7 +44,7 @@ module ScopeChain
   end
 
   class Chain
-    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!]
+    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!, :build]
     ALIASES = {} 
 
     class ConflictedExistenceError < StandardError
