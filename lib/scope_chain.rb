@@ -41,7 +41,7 @@ module ScopeChain
           add_link :build, *arguments
         end
 
-        association.klass.define_method(:build) {}
+        association.klass.define_singleton_method(:build) {}
       end
     end
 
@@ -52,7 +52,7 @@ module ScopeChain
   end
 
   class Chain
-    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!]
+    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!, :limit]
     ALIASES = {} 
 
     class ConflictedExistenceError < StandardError
