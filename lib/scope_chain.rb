@@ -35,16 +35,24 @@ module ScopeChain
 
       ScopeChain::Chain.new(association.klass).tap do |chain|
         instance.stubs(association.name => association.klass)
+
+        # This is a nasty hack
+        chain.define_singleton_method(:build) do |*arguments|
+          add_link :build, *arguments
+        end
+
+        association.klass.define_method(:build) {}
       end
     end
 
     def association
+      # TODO See if we can just mock for the reflection
       @association ||= instance.class.reflect_on_association(association_name)
     end
   end
 
   class Chain
-    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!, :build]
+    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!]
     ALIASES = {} 
 
     class ConflictedExistenceError < StandardError
