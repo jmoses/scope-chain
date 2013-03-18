@@ -118,7 +118,7 @@ module ScopeChain
     end
 
     def link_named_scopes
-      return unless klass.respond_to?(:scopes)
+      return unless klass.respond_to?(:scopes) && klass.scopes.present?
 
       klass.scopes[klass.name].each do |named|
         self.define_singleton_method(named) do |*arguments|
