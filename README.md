@@ -1,60 +1,62 @@
 # ScopeChain
 
-ScopeChain is a tiny help class useful for testing ActiveRecord model scope usage
+ScopeChain is a tiny helper class useful for testing ActiveRecord model scope usage
 and scope chaining
 
 # Usage
 
 For example, say you have:
-
-    class User < ActiveRecord::Base
-    end
+```ruby
+class User < ActiveRecord::Base
+end
+```
 
 And you use that model:
+```ruby
+def some_method
+  User.where(active: 1).order("created_at desc")
+end
+```
 
-    def some_method
-      User.where(active: 1).order("created_at desc")
-    end
-
-And you want to test that method, but without setting creating data in your database,
+And you want to test that method, but without creating data in your database,
 or actually using the data base.
 
 Using ScopeChain, you do:
-
-    context "my method" do
-      it "gets the right users" do
-        ScopeChain.for(User).where(active: 1).order("created_at desc")
-
-        some_method
-      end
-    end
+```ruby
+context "my method" do
+  it "gets the right users" do
+    ScopeChain.for(User).where(active: 1).order("created_at desc")
+    some_method
+  end
+end
+```
 
 What this will do is setup some expectations that make sure those scope methods are called.
 
 You can do "manual" scopes:
+```ruby
+def manual_scopes
+  User.scoped.where("something = else")
+end
 
-    def manual_scopes
-      User.scoped.where("somethign = else")
-    end
-
-    it "does the right thing" do
-      ScopeChain.for(User).where("something = else")
-
-      manual_scopes
-    end
+it "does the right thing" do
+  ScopeChain.for(User).where("something = else")
+  manual_scopes
+end
+```
 
 You can test return values:
+```ruby
+def return_values
+  User.where("thing = 1")
+end
 
-    def return_values
-      User.where("thing = 1")
-    end
+it "returns properly" do
+  ScopeChain.for(User).where("thing = 1").returns(5)
 
-    it "returns properly" do
-      ScopeChain.for(User).where("thing = 1").returns(5)
-
-      return_values.should eq(5)
-    end
-
+  return_values.should eq(5)
+end
+```
 
 Not in order, but called, which is something, right?
 
