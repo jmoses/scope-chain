@@ -1,6 +1,12 @@
 require "scope_chain/version"
 
 module ScopeChain
+  module RspecHelpers
+    def scope_chain(&block)
+      ScopeChain.for(described_class, &block)
+    end
+  end
+
   def self.for(klass, &block)
     Chain.new klass, &block
   end
@@ -135,5 +141,4 @@ class ActiveRecord::Base
   class << self
     alias_method_chain :scope, :tracking
   end
-
 end
