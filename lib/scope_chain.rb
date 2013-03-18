@@ -16,27 +16,30 @@ module ScopeChain
   end
 
   class AssociationChain
-    attr_accessor :instance, :association
+    class MissingAssociationError < StandardError; end
+    attr_accessor :instance, :association_name, :association
 
     def initialize(instance)
       self.instance = instance
     end
 
     def as(association_name)
-      self.association = instance.class.reflect_on_association(association_name)
+      self.association_name = association_name
 
       chain
     end
 
     private
-    def association_name(klass)
-      klass.name.underscore.pluralize
-    end
-
     def chain
+      raise MissingAssociationError.new("Can't find association #{association_name} on #{instance.class.name}") if association.nil?
+
       ScopeChain::Chain.new(association.klass).tap do |chain|
         instance.stubs(association.name => association.klass)
       end
+    end
+
+    def association
+      @association ||= instance.class.reflect_on_association(association_name)
     end
   end
 

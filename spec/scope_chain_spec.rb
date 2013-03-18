@@ -147,6 +147,10 @@ describe ScopeChain::Chain do
   end
 
   context "with associations" do
+    it "raises an error with a missing association" do
+      expect { ScopeChain.on(Owner.new).as(:missing_association)}.to raise_error(ScopeChain::AssociationChain::MissingAssociationError)
+    end
+
     describe "has_many" do
       it "properly sets stuff up" do
         source = Owner.new
