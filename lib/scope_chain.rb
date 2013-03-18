@@ -35,7 +35,7 @@ module ScopeChain
   end
 
   class Chain
-    LINKS = [:select, :where, :includes, :order, :find, :sum, :new]
+    LINKS = [:select, :where, :includes, :order, :find, :sum, :new, :create, :create!]
     ALIASES = {} 
 
     class ConflictedExistenceError < StandardError
@@ -46,7 +46,9 @@ module ScopeChain
       self.klass = klass
       @expectations = []
       @exists_condition = false
-      self.klass.stubs(scoped: klass) # Handle manual scope building
+
+      link_manual_scopes
+      link_named_scopes
 
       yield self if block_given?
     end
@@ -105,5 +107,33 @@ module ScopeChain
       self
     end
 
+    def link_manual_scopes
+      klass.stubs(scoped: klass) # Handle manual scope building
+    end
+
+    def link_named_scopes
+      return unless klass.respond_to?(:scopes)
+
+      klass.scopes[klass.name].each do |named|
+        self.define_singleton_method(named) do |*arguments|
+          add_link named, *arguments
+        end
+      end
+    end
+
   end
+end
+
+# Hooks so named scopes are sane
+class ActiveRecord::Base
+  cattr_reader :scopes
+  def self.scope_with_tracking(*args, &block)
+    (@@scopes ||= Hash.new {|hash, key| hash[key] = [] })[self.name].push args.first
+    scope_without_tracking *args, &block
+  end
+
+  class << self
+    alias_method_chain :scope, :tracking
+  end
+
 end

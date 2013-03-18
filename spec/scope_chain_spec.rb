@@ -138,6 +138,12 @@ describe ScopeChain::Chain do
 
       Model.active.to_a
     end
+
+    it "sets expectations on the named scope" do
+      ScopeChain.for(Model).active.returns(:active)
+
+      Model.active.should eq(:active)
+    end
   end
 
   context "with associations" do

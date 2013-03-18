@@ -58,6 +58,27 @@ it "returns properly" do
 end
 ```
 
+You can test associations on individual model instances:
+
+```ruby
+class Model < ActiveRecord::Base
+end
+
+class Owner < ActiveRecord::Base
+  has_many :models
+
+  def my_method
+    models.create(column: 5)
+  end
+end
+
+def test_my_method
+  owner = Owner.new
+  ScopeChain.on(owner).as(:models).create(column: 5)
+
+  owner.my_method
+end
+
 Not in order, but called, which is something, right?
 
 ## Known Issues
