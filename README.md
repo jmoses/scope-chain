@@ -78,8 +78,30 @@ def test_my_method
 
   owner.my_method
 end
+```
 
-Not in order, but called, which is something, right?
+You can test named scopes (for execution, not for what they do):
+
+```ruby
+class Model < ActiveRecord::Base
+  scope :active, where("1 = 1")
+
+  def self.my_method
+    active.order("id")
+end
+
+it "should be ordered" do
+  ScopeChain.for(Model).active.order("id").returns("abc")
+
+  Model.active.should eq("abc")
+end
+```
+
+Note that the named scope support does dirty things to the ActiveRecord namespace,
+which means you *really should* have "require: false" in your Gemfile.  
+
+Like, for reals.
+
 
 ## Known Issues
 
